@@ -1,0 +1,75 @@
+{% extends 'main/base_site.html' %}
+
+{% block title %}New batch | Homebrew{% endblock %}
+
+{% block scripts %}
+    {% load static %}
+    <script src="{% static 'main/assets/js/highcharts.js' %}"></script>
+    <script src="{% static 'main/assets/js/highcharts.modules.exporting.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment-timezone.js' %}"></script>
+
+    <!-- Set chart options -->
+    <script type="text/javascript">var chart = 0;</script>
+    <script src="{% static 'main/assets/js/new-batch.js' %}"></script>
+{% endblock scripts %}
+
+{% block subtitle %}New batch{% endblock subtitle %}
+
+{% block content %}
+    <section>
+
+        <!--<a href="#" class="image featured"><img src="images/pic04.jpg" alt="" /></a>-->
+        <div id="highcharts_featured" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    </section>
+
+    <section>
+        <form action="{% url 'main:new-batch' %}"
+              onsubmit="return confirm('Are you sure you want to start this batch?');"
+              method="post">{% csrf_token %}
+            <div class="row 50%">
+                <div class="3u 12u(mobile)">
+                    <h4>Batch num</h4>
+                    <input type="text" name="batch_num" id="batch_num" placeholder="e.g. 1"/>
+                </div>
+                <div class="9u 12u(mobile)">
+                    <h4>Beer type</h4>
+                    <input type="text" name="type" id="type" placeholder="e.g. Amber ale"/>
+                </div>
+            </div>
+            <br>
+            <h4>Setpoints</h4>
+            <div class="insert_fields row 50%">
+                <div class="3u 12u(mobile)">
+                    <input type="text" name="point1" id="point1" placeholder="<Hours>,<Temp>"/>
+                </div>
+                <div class="3u 12u(mobile)">
+                    <input type="text" name="point2" id="point2" placeholder="<Hours>,<Temp>"/>
+                </div>
+                <div class="3u 12u(mobile)">
+                    <input type="text" name="point3" id="point3" placeholder="<Hours>,<Temp>"/>
+                </div>
+                <div class="3u 12u(mobile)">
+                    <input type="text" name="point4" id="point4" placeholder="<Hours>,<Temp>"/>
+                </div>
+            </div>
+            <div class="row 50%">
+                <div class="12u">
+                    <ul class="buttons">
+                        <li><input type="button" class="add_field" value="Add point"/></li>
+                        <li><input type="button" class="remove_field" value="Remove point"/></li>
+                        <li><input type="submit" class="special" value="Start brewing" style=""/></li>
+                    </ul>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section>
+        <header>
+            <h3>Control your future</h3>
+        </header>
+        <p>What's a future without beer? Make sure your brewing process is perfect.</p>
+    </section>
+{% endblock content %}

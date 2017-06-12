@@ -1,0 +1,20 @@
+$(function () {
+{% for datapoint in data %}
+    chart.series[0].addPoint({{ datapoint|safe }});
+{% endfor %}
+{% if status %}
+    current_temp = {{ status.current_temp }};
+    {% if status.is_heating %}
+        is_heating = true;
+    {% else %}
+        is_heating = false;
+    {% endif %}
+{% endif %}
+{% if is_brewing %}
+    is_brewing = true;
+{% else %}
+    is_brewing = false;
+{% endif %}
+})
+
+

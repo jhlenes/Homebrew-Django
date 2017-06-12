@@ -1,0 +1,75 @@
+{% extends 'main/base_site.html' %}
+
+{% block title %}Previous batches | Homebrew{% endblock title %}
+
+{% block scripts %}
+    {% load static %}
+    <script src="{% static 'main/assets/js/jquery.tablesorter.js' %}"></script>
+    <script src="{% static 'main/assets/js/highcharts.js' %}"></script>
+    <script src="{% static 'main/assets/js/highcharts.modules.exporting.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment-timezone.js' %}"></script>
+
+    <!-- Set chart options -->
+    <script type="text/javascript">
+        var chart = 0;
+        var url = "{% url 'main:previous-batches' %}";
+    </script>
+    <script src="{% static 'main/assets/js/previous-batches.js' %}"></script>
+    {% if batch %}
+        <script type="text/javascript">
+            $(function () {
+                chart.setTitle({
+                    text: '{{ batch.beer_type }}'
+                });
+                chart.setSubtitle({
+                    text: 'Batch #{{ batch.batch_num }}: {{ batch.start_date|date:"d M Y" }}'
+                });
+                chart.series[0].setData({{ measurements|safe }});
+                chart.series[1].setData({{ setpoints|safe }});
+            });
+        </script>
+    {% endif %}
+{% endblock scripts %}
+
+{% block subtitle %}Previous batches{% endblock subtitle %}
+{% block content %}
+
+    <section>
+        <div id="highcharts_featured"
+             style="min-width: 310px; height: 400px; margin: 0 auto; {% if not batch %}display:none;{% endif %}">
+        </div>
+    </section>
+
+    <section>
+        <header>
+            <h3>Select a batch</h3>
+        </header>
+        <table class="default batches" id="batchesTable">
+            <thead>
+            <th>Batch <i class="fa fa-sort" aria-hidden="true" style="color:#fff"></i></th>
+            <th>Beer type <i class="fa fa-sort" aria-hidden="true" style="color:#fff"></i></th>
+            <th>Date <i class="fa fa-sort" aria-hidden="true" style="color:#fff"></i></th>
+            </thead>
+            <tbody>
+            {% if batches %}
+                {% for row in batches %}
+                    <tr>
+                        <td data-batch_id="{{ row.id }}">{{ row.batch_num }}</td>
+                        <td>{{ row.beer_type }}</td>
+                        <td>{{ row.start_date|date:"d.m.Y" }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <header>
+            <h3>Know your history</h3>
+        </header>
+        <p>Did you accidentally brew the world's best beer? Check out how, and make it again.</p>
+    </section>
+
+{% endblock %}

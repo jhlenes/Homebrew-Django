@@ -1,0 +1,64 @@
+{% extends 'main/base_site.html' %}
+
+{% block scripts %}
+    {% load static %}
+    <script src="{% static 'main/assets/js/highcharts.js' %}"></script>
+    <script src="{% static 'main/assets/js/highcharts.modules.exporting.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment.js' %}"></script>
+    <script src="{% static 'main/assets/js/moment-timezone.js' %}"></script>
+
+    <!-- Set chart options -->
+    <script type="text/javascript">var chart = 0;</script>
+    <script src="{% static 'main/assets/js/index.js' %}"></script>
+    {% if batch %}
+        <script type="text/javascript">
+            $(function () {
+                chart.setTitle({
+                    text: '{{ batch.beer_type }}'
+                });
+                chart.setSubtitle({
+                    text: 'Batch #{{ batch.batch_num }}: {{ batch.start_date|date:"d M Y" }}'
+                });
+                chart.series[0].setData({{ measurements|safe }});
+                chart.series[1].setData({{ setpoints|safe }});
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section>
+        {% if batch.is_brewing %}
+            <div id="brewstatusbar" class="row 50%">
+                <div class="9u 12u(mobile)">
+                    <h2>
+                        <span class="icon fa-thermometer-half"></span>
+                        <span id="current_temp">{{ batch.status.current_temp }}</span>&deg;C
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="icon fa-fire"></span>
+                        {% if batch.status.is_heating %}
+                            <span id="is_heating" style="color:green" class="icon fa-check"></span>
+                        {% else %}
+                            <span id="is_heating" style="color:red " class="icon fa-times"></span>
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="3u 12u(mobile)">
+                        <input type="submit" class="special abortbutton" value="Abort batch"/>
+                </div>
+            </div>
+        {% else %}
+            <h2 id="brewstatustitle">LATEST BATCH</h2>
+        {% endif %}
+
+        <div id="highcharts_featured" data-batch_id="{{ batch.id }}"
+             style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+    </section>
+
+    <section>
+        <header>
+            <h3>Watch your beer</h3>
+        </header>
+        <p>Monitor your brewing in realtime, because nothing is more exciting.</p>
+    </section>
+{% endblock %}
