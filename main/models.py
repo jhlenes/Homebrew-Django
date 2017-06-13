@@ -29,28 +29,25 @@ class Batch(models.Model):
         :param datetime:
             use this if the user only wants the measurements after a given time
         :return:
-            an array where each element is an array containing the time and temperature of a measure,
-            i.e: [<time(millis)>, <temp(Celsius)>]
+            if datetime specified, returns an array of strings, else a string representation of the same array.
+            Each element in the array is of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
-        data = []
         if datetime is not None:
+            data = []
             for measurement in self.measurement_set.all().filter(time__gte=datetime).order_by('time'):
                 data.append(measurement.as_time_temp_array())
+            return data
         else:
-            for measurement in self.measurement_set.all().order_by('time'):
-                data.append(measurement.as_time_temp_array())
-        return data
+            data = '[' + ','.join([x.as_time_temp_array() for x in self.measurement_set.all().order_by('time')]) + ']'
+            return data
 
     def get_point_temp_time_array(self):
         """
         :returns:
-            an array where each element is an array containing the time and temperature of a point,
-            i.e: [<time(millis)>, <temp(Celsius)>]
+            a string representation of an array where each element is of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
-        setpoint = []
-        for point in self.point_set.all().order_by('hours'):
-            setpoint.append(point.as_time_temp_array())
-        return setpoint
+        data = '[' + ','.join([x.as_time_temp_array() for x in self.point_set.all().order_by('hours')]) + ']'
+        return data
 
     def get_setpoint(self):
         """ Calculates the current setpoint based on the points.
@@ -70,8 +67,9 @@ class Batch(models.Model):
                 setpoint = point1.temperature + derivative * (hours_passed - point1.hours)
 
                 return setpoint
-            except KeyError:
+            except IndexError:
                 self.is_brewing = False
+                self.save()
                 return None
         return None
 
@@ -90,16 +88,17 @@ class Measurement(models.Model):
     def as_time_temp_array(self):
         """
         :returns:
-            the measurement as an array of the form: [time(millis), temp(Celsius)]
+            the measurement as a string of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
         # convert datetime to unix time and then to millis
         time_in_millis = int(format(self.time, 'U')) * 1000
-        return [time_in_millis, self.temperature]
+        return ''.join(('[', str(time_in_millis), ',', str(self.temperature), ']'))
 
 
 class Point(models.Model):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
-    hours = models.IntegerField()
+    point_num = models.PositiveIntegerField()
+    hours = models.PositiveIntegerField()
     temperature = models.FloatField()
 
     def __str__(self):
@@ -108,11 +107,19 @@ class Point(models.Model):
     def as_time_temp_array(self):
         """
         :returns:
-            the point as an array of the form: [time(millis), temp(Celsius)]
+            the point as a string of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
+        points = self.batch.point_set.all().filter(batch__point__point_num__lt=self.point_num)
+        hours = self.hours
+        for point in points:
+            hours += point.hours
+
         # convert start date of batch to millis and add the hours from this point in millis
-        time_in_millis = int(format(self.batch.start_date, 'U')) * 1000 + self.hours * 3600 * 1000
-        return [time_in_millis, self.temperature]
+        time_in_millis = int(format(self.batch.start_date, 'U')) * 1000 + hours * 3600 * 1000
+        return ''.join(('[', str(time_in_millis), ',', str(self.temperature), ']'))
+
+    class Meta():
+        unique_together = ('batch', 'point_num',)
 
 
 class Status(models.Model):

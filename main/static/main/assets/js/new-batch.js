@@ -41,7 +41,11 @@ $(function () {
         },
         series: [{
             name: 'Setpoint',
-            data: []
+            data: [],
+            color: '#434348',
+            marker: {
+                symbol: 'diamond'
+            }
         }
         ],
         credits: {

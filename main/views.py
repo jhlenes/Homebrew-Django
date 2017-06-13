@@ -76,7 +76,10 @@ def new_batch(request):
     batch = Batch(batch_num=batch_num, beer_type=beer_type, start_date=timezone.now(), is_brewing=True)
 
     # Stop last batch if brewing
-    Batch.get_latest().is_brewing = False
+    last_batch = Batch.get_latest()
+    if last_batch is not None and last_batch.is_brewing:
+        last_batch.is_brewing = False
+        last_batch.save()
 
     batch.save()
 
@@ -86,7 +89,7 @@ def new_batch(request):
             num = int(key[4:])
             hour = int(request.POST[key])
             temp = float(request.POST['temp' + str(num)])
-            points.append(Point(batch=batch, hours=hour, temperature=temp))
+            points.append(Point(batch=batch, point_num=num, hours=hour, temperature=temp))
 
     for point in points:
         point.save()
