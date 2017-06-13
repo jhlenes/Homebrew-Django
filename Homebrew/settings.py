@@ -26,7 +26,7 @@ SECRET_KEY = 'je(3zrk3g5*xj7@3rb&$n1(plwp5h@!eb3)$0#a)6k&0h(0sfy'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['Homebrew.local']
 
 # Application definition
 
