@@ -59,18 +59,29 @@ class Batch(models.Model):
             now = int(format(datetime.datetime.now(), 'U'))
             hours_passed = (now - start_time) / 3600.0
 
-            try:
-                point1 = self.point_set.all().order_by('-hours').filter(hours__lte=hours_passed)[0]
-                point2 = self.point_set.all().order_by('hours').filter(hours__gt=hours_passed)[0]
-
-                derivative = (point2.temperature - point1.temperature) / float(point2.hours - point1.hours)
-                setpoint = point1.temperature + derivative * (hours_passed - point1.hours)
-
-                return setpoint
-            except IndexError:
+            point1 = None
+            points = self.point_set.all().order_by('point_num')
+            print(points)
+            hours = 0.0
+            for i in range(0, points.count()):
+                point = points[i]
+                hours += point.hours
+                if hours > hours_passed:
+                    print(hours)
+                    print(hours_passed)
+                    point2 = point
+                    point1 = points[i-1]
+                    break
+            if point1 is None:
                 self.is_brewing = False
                 self.save()
                 return None
+
+            derivative = (point2.temperature - point1.temperature) / float(point2.hours)
+            setpoint = point1.temperature + derivative * (hours_passed - (hours - point2.hours))
+
+            return setpoint
+
         return None
 
     class Meta:
@@ -109,7 +120,7 @@ class Point(models.Model):
         :returns:
             the point as a string of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
-        points = self.batch.point_set.all().filter(batch__point__point_num__lt=self.point_num)
+        points = self.batch.point_set.all().filter(point_num__lt=self.point_num)
         hours = self.hours
         for point in points:
             hours += point.hours

@@ -23,7 +23,7 @@ class BatchAdmin(admin.ModelAdmin):
     search_fields = ['beer_type']
 
 
-class MeasurmentAdmin(admin.ModelAdmin):
+class MeasurementAdmin(admin.ModelAdmin):
     list_display = ('batch', 'time', 'temperature')
     list_display_links = ('time', 'temperature')
     list_filter = ['batch', 'time', 'temperature']
@@ -31,4 +31,4 @@ class MeasurmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Batch, BatchAdmin)
-admin.site.register(Measurement, MeasurmentAdmin)
+admin.site.register(Measurement, MeasurementAdmin)

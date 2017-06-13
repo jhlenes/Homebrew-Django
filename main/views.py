@@ -128,4 +128,4 @@ def receive(request):
                 'batch_id': batch.id,
                 'setpoint': setpoint
             }))
-    return HttpResponse(json.dumps({}))
+    return HttpResponse(json.dumps({'batch_id': -1}))
