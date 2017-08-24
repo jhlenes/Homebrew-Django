@@ -48,7 +48,7 @@ class Batch(models.Model):
         :returns:
             a string representation of an array where each element is of the form: '[<time(millis)>,<temp(Celsius)>]'
         """
-        data = '[' + ','.join([x.as_time_temp_array() for x in self.point_set.all().order_by('hours')]) + ']'
+        data = '[' + ','.join([x.as_time_temp_array() for x in self.point_set.all().order_by('point_num')]) + ']'
         return data
 
     def get_setpoint(self, time=False):
