@@ -41,7 +41,7 @@ def send(request):
     batch_id = request.GET.get('id', False)
     if not batch_id:
         return HttpResponseBadRequest("Bad Request: Specify 'id'")
-    batch = Batch.objects.get(id=int(batch_id))
+    batch = get_object_or_404(Batch, pk=batch_id)
 
     if batch.is_brewing:
         temp = request.GET.get('temp', False)
@@ -65,7 +65,9 @@ def send(request):
             batch.is_brewing = status
             batch.save(update_fields=['is_brewing'])
 
-    return HttpResponse("OK")
+        return HttpResponse("OK")
+    else:
+        return HttpResponse("Batch is not active")
 
 
 def new_batch(request):

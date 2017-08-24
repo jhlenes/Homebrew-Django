@@ -80,8 +80,6 @@ $(document).ready(function () {
 
                 // Update brewstatusbar
                 if (is_brewing) {
-                    $('#brewstatusbar').css('display', 'block');
-                    $('#brewstatustitle').css('display', 'none');
                     $('#current_temp').text(current_temp);
                     if (is_heating) {
                         $('#is_heating').attr('class', 'icon fa-check').css('color', 'green');
@@ -89,8 +87,7 @@ $(document).ready(function () {
                         $('#is_heating').attr('class', 'icon fa-times').css('color', 'red');
                     }
                 } else {
-                    $('#brewstatusbar').css('display', 'none');
-                    $('#brewstatustitle').css('display', 'block');
+                    $('#brewstatusbar').css('display', 'none').after('<h2>Latest batch</h2>');
                 }
 
             }

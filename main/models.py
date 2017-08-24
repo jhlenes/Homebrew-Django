@@ -1,6 +1,8 @@
-import datetime
+import json
 
+import requests
 from django.db import models
+from django.utils import timezone
 from django.utils.dateformat import format
 
 
@@ -49,40 +51,47 @@ class Batch(models.Model):
         data = '[' + ','.join([x.as_time_temp_array() for x in self.point_set.all().order_by('hours')]) + ']'
         return data
 
-    def get_setpoint(self):
+    def get_setpoint(self, time=False):
         """ Calculates the current setpoint based on the points.
         :returns:
             The setpoint if batch is brewing, else None.
         """
         if self.is_brewing:
+            if not time:
+                time = timezone.now()
             start_time = int(format(self.start_date, 'U'))
-            now = int(format(datetime.datetime.now(), 'U'))
+            now = int(format(time, 'U'))
             hours_passed = (now - start_time) / 3600.0
 
             point1 = None
             points = self.point_set.all().order_by('point_num')
-            print(points)
             hours = 0.0
             for i in range(0, points.count()):
                 point = points[i]
                 hours += point.hours
                 if hours > hours_passed:
-                    print(hours)
-                    print(hours_passed)
                     point2 = point
-                    point1 = points[i-1]
+                    point1 = points[i - 1]
                     break
             if point1 is None:
                 self.is_brewing = False
                 self.save()
+                self.slackbot_send()
                 return None
 
             derivative = (point2.temperature - point1.temperature) / float(point2.hours)
             setpoint = point1.temperature + derivative * (hours_passed - (hours - point2.hours))
-
             return setpoint
 
         return None
+
+    def slackbot_send(self):
+        webhook_url = 'https://hooks.slack.com/services/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'
+        slack_data = {'text': "{} has finished brewing.".format(self)}
+        requests.post(
+            webhook_url, data=json.dumps(slack_data),
+            headers={'Content-Type': 'application/json'}
+        )
 
     class Meta:
         verbose_name_plural = "batches"
